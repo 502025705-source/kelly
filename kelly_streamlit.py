@@ -5,8 +5,8 @@ import plotly.graph_objects as go
 st.set_page_config(
     page_title="凯利公式计算器",
     page_icon="📊",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    layout="centered",
+    initial_sidebar_state="collapsed"
 )
 
 # 页面样式
@@ -18,6 +18,26 @@ st.markdown("""
         background-color: #f0f2f6;
         margin: 10px 0;
     }
+    
+    /* 移动端优化 */
+    body {
+        max-width: 100%;
+    }
+    
+    .st-emotion-cache-z5fcl4 {
+        padding: 1rem;
+    }
+    
+    h1, h2, h3 {
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* 数字输入框响应式 */
+    input[type="number"] {
+        font-size: 16px;
+        width: 100%;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -25,8 +45,9 @@ st.markdown("""
 st.markdown("# 📊 凯利公式仓位计算器")
 st.markdown("---")
 
-# 左右两列布局
-col1, col2 = st.columns([1, 1], gap="large")
+# 左右两列布局（移动端自动堆叠）
+col1 = st.container()
+col2 = st.container()
 
 with col1:
     st.markdown("### 📝 输入参数")
@@ -65,13 +86,9 @@ with col2:
         # 正期望值
         st.success("✅ 正期望值 - 可以投资")
         
-        col_a, col_b, col_c = st.columns(3)
-        with col_a:
-            st.metric("全凯利仓位", f"{f_star*100:.2f}%", delta="激进")
-        with col_b:
-            st.metric("半凯利仓位 (推荐)", f"{half_kelly*100:.2f}%", delta="稳健")
-        with col_c:
-            st.metric("期望增长率", f"{(b*p - q)*100:.2f}%", delta="每局期望")
+        st.metric("全凯利仓位", f"{f_star*100:.2f}%", delta="激进")
+        st.metric("半凯利仓位 (推荐)", f"{half_kelly*100:.2f}%", delta="稳健")
+        st.metric("期望增长率", f"{(b*p - q)*100:.2f}%", delta="每局期望")
     else:
         # 负期望值
         st.error("❌ 负期望值 - 请勿参与")
@@ -82,31 +99,27 @@ st.markdown("---")
 # 详细分析
 st.markdown("### 📈 详细分析")
 
-col_info1, col_info2 = st.columns(2)
+st.markdown(f"""
+**当前参数：**
+- 胜率：{p*100:.2f}%
+- 赔率：{b}:1
+- 败率：{q*100:.2f}%
+""")
 
-with col_info1:
+if f_star > 0:
     st.markdown(f"""
-    **当前参数：**
-    - 胜率：{p*100:.2f}%
-    - 赔率：{b}:1
-    - 败率：{q*100:.2f}%
+    **推荐方案：**
+    - 🎯 全凯利：{f_star*100:.2f}%
+    - 💡 半凯利：{half_kelly*100:.2f}%（更稳健）
+    - 🛡️ 四分之一凯利：{(f_star/4)*100:.2f}%（超保守）
     """)
-
-with col_info2:
-    if f_star > 0:
-        st.markdown(f"""
-        **推荐方案：**
-        - 🎯 全凯利：{f_star*100:.2f}%
-        - 💡 半凯利：{half_kelly*100:.2f}%（更稳健）
-        - 🛡️ 四分之一凯利：{(f_star/4)*100:.2f}%（超保守）
-        """)
-    else:
-        st.markdown(f"""
-        **风险提示：**
-        ⚠️ 此局胜率或赔率过低，长期必输。
-        
-        建议 **规避此交易**。
-        """)
+else:
+    st.markdown(f"""
+    **风险提示：**
+    ⚠️ 此局胜率或赔率过低，长期必输。
+    
+    建议 **规避此交易**。
+    """)
 
 # 可视化图表
 st.markdown("### 📉 仓位与胜率关系图")
@@ -156,7 +169,7 @@ fig.update_layout(
     xaxis_title="胜率 (%)",
     yaxis_title="建议仓位 (%)",
     hovermode='x unified',
-    height=400,
+    height=350,
     template="plotly_light"
 )
 
