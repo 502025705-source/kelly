@@ -170,7 +170,7 @@ fig.update_layout(
     yaxis_title="建议仓位 (%)",
     hovermode='x unified',
     height=350,
-    template="plotly_light"
+    template="plotly_white"
 )
 
 st.plotly_chart(fig, use_container_width=True)
