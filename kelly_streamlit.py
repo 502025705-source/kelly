@@ -69,9 +69,11 @@ with col1:
         min_value=0.1,
         value=2.0,
         step=0.1,
-        help="例如：2 表示盈亏比为 2:1"
+        help="例如：2 表示盈亏比为 2:1。若庄家赔率为 3.0，则隐含概率约为 1/3"
     )
     b = payoff_ratio
+    bookmaker_odds = b + 1
+    implied_probability = 1 / bookmaker_odds
 
 with col2:
     st.markdown("### 📊 计算结果")
@@ -89,10 +91,12 @@ with col2:
         st.metric("全凯利仓位", f"{f_star*100:.2f}%", delta="激进")
         st.metric("半凯利仓位 (推荐)", f"{half_kelly*100:.2f}%", delta="稳健")
         st.metric("期望增长率", f"{(b*p - q)*100:.2f}%", delta="每局期望")
+        st.metric("庄家隐含概率", f"{implied_probability*100:.2f}%", delta=f"赔率 {bookmaker_odds:.2f}")
     else:
         # 负期望值
         st.error("❌ 负期望值 - 请勿参与")
         st.warning(f"计算结果: {f_star*100:.2f}% (需要回避)")
+        st.metric("庄家隐含概率", f"{implied_probability*100:.2f}%", delta=f"赔率 {bookmaker_odds:.2f}")
 
 st.markdown("---")
 
@@ -102,7 +106,9 @@ st.markdown("### 📈 详细分析")
 st.markdown(f"""
 **当前参数：**
 - 胜率：{p*100:.2f}%
-- 赔率：{b}:1
+- 净赔率/盈亏比：{b}:1
+- 庄家赔率：{bookmaker_odds:.2f}
+- 庄家隐含概率：{implied_probability*100:.2f}%
 - 败率：{q*100:.2f}%
 """)
 
@@ -187,6 +193,11 @@ st.markdown("""
 - $q$ = 败率 (1 - p)
 - $b$ = 净赔率/盈亏比
 - $f^*$ = 最优仓位比例
+
+**赔率与隐含概率：**
+- 庄家赔率通常可换算为隐含概率：$P = 1 / Odds$
+- 如果你输入的是净赔率/盈亏比 $b$，对应的庄家赔率约为 $b + 1$
+- 因此隐含概率约为 $1 / (b + 1)$
 
 **建议：**
 - ✅ **半凯利策略** 是最常见的实战方法，风险更低
